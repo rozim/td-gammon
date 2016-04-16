@@ -202,6 +202,11 @@ class Model(object):
 
         validation_interval = 1000
         episodes = 5000
+        report_freq = 10
+
+        prev_time = time.time()
+        prev_step = self.sess.run(self.global_step)
+        plies_per_batch = 0
 
         for episode in range(episodes):
             if episode != 0 and episode % validation_interval == 0:
@@ -232,10 +237,35 @@ class Model(object):
                 self.summaries_op,
                 self.reset_op
             ], feed_dict={ self.x: x, self.V_next: np.array([[winner]], dtype='float') })
-            summary_writer.add_summary(summaries, global_step=global_step)
 
             print("Game %d/%d (Winner: %s) in %d turns" % (episode, episodes, players[winner].player, game_step))
-            self.saver.save(self.sess, self.checkpoint_path + 'checkpoint', global_step=global_step)
+            plies_per_batch += game_step
+            if episode != 0 and episode % report_freq == 0:
+                now = time.time()
+                elapsed_time = now - prev_time
+                steps_per_sec = (global_step - prev_step) / elapsed_time
+                games_per_sec = report_freq / elapsed_time
+                plies_per_game = plies_per_batch / report_freq
+                print('e=%.2f sps=%.2f gps=%.2f ppg=%.1f global=%d prev=%d' % (elapsed_time, steps_per_sec, games_per_sec, plies_per_game, global_step, prev_step))
+                
+                summary_writer.add_summary(summaries, global_step=global_step)
+                
+                s1 = tf.Summary(value=[tf.Summary.Value(tag='rate/global_steps_sec',
+                                                        simple_value=steps_per_sec)])
+                summary_writer.add_summary(s1, global_step)
+                
+                s2 = tf.Summary(value=[tf.Summary.Value(tag='rate/games_sec',
+                                                        simple_value=games_per_sec)])
+                summary_writer.add_summary(s2, global_step)
+                
+                s3 = tf.Summary(value=[tf.Summary.Value(tag='rate/plies_per_game',
+                                                        simple_value=plies_per_game)])
+                summary_writer.add_summary(s3, global_step)
+                
+                self.saver.save(self.sess, self.checkpoint_path + 'checkpoint', global_step=global_step)
+                prev_time = now
+                prev_step = global_step
+                plies_per_batch = 0
 
         summary_writer.close()
 
