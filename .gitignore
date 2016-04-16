@@ -3,5 +3,5 @@
 logs/
 summaries/
 models/
-checkpoints/
 *.pyc
+checkpoints/
