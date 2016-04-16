@@ -194,7 +194,8 @@ class Model(object):
 
     def train(self):
         tf.train.write_graph(self.sess.graph_def, self.model_path, 'td_gammon.pb', as_text=False)
-        summary_writer = tf.train.SummaryWriter('{0}{1}'.format(self.summary_path, int(time.time()), self.sess.graph_def))
+        summary_writer = tf.train.SummaryWriter('{0}{1}'.format(self.summary_path, int(time.time()),
+                                                                graph_def=self.sess.graph_def))
 
         # the agent plays against itself, making the best move for each player
         players = [TDAgent(Game.TOKENS[0], self), TDAgent(Game.TOKENS[1], self)]
