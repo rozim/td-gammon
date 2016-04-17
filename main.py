@@ -10,6 +10,7 @@ flags.DEFINE_boolean('test', False, 'If true, test against a random strategy.')
 flags.DEFINE_boolean('play', False, 'If true, play against a trained TD-Gammon strategy.')
 flags.DEFINE_boolean('random_selfplay', False, 'Watch 2 random agents play')
 flags.DEFINE_boolean('restore', False, 'If true, restore a checkpoint before training.')
+flags.DEFINE_integer('train_episodes', 5000, 'How many episodes to train for')
 
 model_path = os.environ.get('MODEL_PATH', 'models/')
 summary_path = os.environ.get('SUMMARY_PATH', 'summaries/')
@@ -36,4 +37,4 @@ if __name__ == '__main__':
         elif FLAGS.random_selfplay:
             model.random_selfplay()
         else:
-            model.train()
+            model.train(FLAGS.train_episodes)
