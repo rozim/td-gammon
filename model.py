@@ -154,7 +154,7 @@ class Model(object):
         self.summaries_op = tf.merge_all_summaries()
 
         # create a saver for periodic checkpoints
-        self.saver = tf.train.Saver(max_to_keep=1)
+        self.saver = tf.train.Saver(max_to_keep=10, keep_checkpoint_every_n_hours=1)
 
         # run variable initializers
         self.sess.run(tf.initialize_all_variables())
