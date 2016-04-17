@@ -192,6 +192,12 @@ class Model(object):
                 winners[0], winners[1], winners_total, \
                 (winners[0] / winners_total) * 100.0))
 
+    def random_selfplay(self):
+        players = [RandomAgent(Game.TOKENS[0]), RandomAgent(Game.TOKENS[1])]
+        game = Game.new()
+        game.SLEEP = 0
+        winner = game.play(players, draw=True)
+
     def train(self):
         tf.train.write_graph(self.sess.graph_def, self.model_path, 'td_gammon.pb', as_text=False)
         summary_writer = tf.train.SummaryWriter('{0}{1}'.format(self.summary_path, int(time.time()), self.sess.graph_def))

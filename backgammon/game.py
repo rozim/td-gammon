@@ -12,6 +12,7 @@ class Game:
     OFF = 'off'
     ON = 'on'
     TOKENS = ['x', 'o']
+    SLEEP = 1
 
     def __init__(self, layout=LAYOUT, grid=None, off_pieces=None, bar_pieces=None, num_pieces=None, players=None):
         """
@@ -80,10 +81,13 @@ class Game:
     def take_turn(self, player, roll, draw=False):
         if draw:
             print("Player %s rolled <%d, %d>." % (player.player, roll[0], roll[1]))
-            time.sleep(1)
+            time.sleep(self.SLEEP)
 
         moves = self.get_actions(roll, player.player, nodups=True)
         move = player.get_action(moves, self) if moves else None
+
+        if draw:
+            print("Player %s played %s" % (player.player, str(move)))
 
         if move:
             self.take_action(move, player.player)
