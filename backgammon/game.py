@@ -90,6 +90,9 @@ class Game:
         moves = self.get_actions(roll, player.player, nodups=True)
         move = player.get_action(moves, self) if moves else None
 
+        if draw:
+            print("Player %s played %s" % (player.player, str(move)))
+
         if move:
             self.take_action(move, player.player)
 
