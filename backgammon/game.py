@@ -12,6 +12,7 @@ class Game:
     OFF = 'off'
     ON = 'on'
     TOKENS = ['x', 'o']
+    SLEEP = 1
 
     def __init__(self, layout=LAYOUT, grid=None, off_pieces=None, bar_pieces=None, num_pieces=None, players=None):
         """
@@ -65,7 +66,11 @@ class Game:
     def play(self, players, draw=False):
         player_num = random.randint(0, 1)
         while not self.is_over():
+            if player_num:
+                self.reverse()
             self.next_step(players[player_num], player_num, draw=draw)
+            if player_num:
+                self.reverse()            
             player_num = (player_num + 1) % 2
         return self.winner()
 
@@ -80,7 +85,7 @@ class Game:
     def take_turn(self, player, roll, draw=False):
         if draw:
             print("Player %s rolled <%d, %d>." % (player.player, roll[0], roll[1]))
-            time.sleep(1)
+            time.sleep(self.SLEEP)
 
         moves = self.get_actions(roll, player.player, nodups=True)
         move = player.get_action(moves, self) if moves else None
@@ -266,6 +271,9 @@ class Game:
                 return True
         return False
 
+    # TBD: this is wrong unless it is only called on the player moving
+    # in the positive direction -- if one player is all in the
+    # wrong home board then it says we can bear off
     def can_offboard(self, player):
         count = 0
         for i in range(Game.NUMCOLS - self.die, Game.NUMCOLS):
@@ -349,3 +357,31 @@ class Game:
             for piece in self.bar_pieces[t]:
                 print t+'',
             print
+
+if __name__ == '__main__':
+    g = Game.new()        
+    print 'grid', g.grid
+    print 'off', g.off_pieces
+    print 'bar', g.bar_pieces
+    print 'num', g.num_pieces
+    print 'players', g.players
+
+    from agents.random_agent import RandomAgent
+    print 'playing'
+    g.SLEEP = 0
+
+    wins = [0, 0]
+    points = [0, 0]    
+    for _ in range(100):
+        g = Game.new()        
+        winner = g.play([RandomAgent(Game.TOKENS[0]),
+                         RandomAgent(Game.TOKENS[1])], draw=False)
+        wins[winner] += 1
+        print 'winner=', winner, len(g.off_pieces[g.TOKENS[0]]), len(g.off_pieces[g.TOKENS[1]])
+        points[0] += len(g.off_pieces[g.TOKENS[0]])
+        points[1] += len(g.off_pieces[g.TOKENS[1]])        
+    print 'wins[0]', wins[0]
+    print 'wins[1]', wins[1]
+    print 'points[0]', points[0]
+    print 'points[1]', points[1]        
+    #g.draw()
